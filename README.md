@@ -5,6 +5,6 @@ A simple serverless function that is called periodically to download and save [E
 Reasons why this proxy was created:
 
 1. Response time can vary a lot.
-.. From time to time, some of the lists would time out or would not be available at all.
+2. From time to time, some of the lists would time out or would not be available at all.
 
 By keeping a copy of the lists, we can distribute them using our own CDN. Therefore, we can be pretty sure the user will be able to get any of them reliably and predictably fast.
