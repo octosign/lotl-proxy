@@ -5,19 +5,20 @@
   "main": "handler.js",
   "scripts": {
     "start": "sls offline",
+    "deploy": "sls deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jakub Duras",
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "fast-xml-parser": "^3.16.0",
-    "mime-types": "^2.1.27",
-    "node-fetch": "^2.6.0"
+    "fast-xml-parser": "^3.19.0",
+    "mime-types": "^2.1.31",
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "aws-sdk": "^2.672.0",
-    "serverless-api-compression": "^1.0.1",
-    "serverless-offline": "^6.1.5"
+    "serverless-offline": "^7.0.0",
+    "serverless": "2.47.0"
   }
 }

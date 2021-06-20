@@ -27,28 +27,27 @@ module.exports.refresh = async (event, context, callback) => {
     }
 
     const lotl = parser.parse(lotlResponse);
-    const list = lotl.TrustServiceStatusList.SchemeInformation.PointersToOtherTSL.OtherTSLPointer;
 
-    await Promise.all(list.map(async location => {
+    const saveUrl = async url => {
         let response;
         try {
-            response = await fetch(location.TSLLocation);
+            response = await fetch(url);
         } catch (e) {
-            console.warn(`Skipping "${location.TSLLocation}" due to error "${e}".`);
+            console.warn(`Skipping "${url}" due to error "${e}".`);
             return;
         }
         if (response.status !== 200) {
-            console.warn(`Skipping "${location.TSLLocation}" due to HTTP status code "${response.status}".`);
+            console.warn(`Skipping "${url}" due to HTTP status code "${response.status}".`);
             return;
         }
         const content = await response.text();
         if (content.length === 0) {
-            console.warn(`Skipping "${location.TSLLocation}" because it is empty.`);
+            console.warn(`Skipping "${url}" because it is empty.`);
             return;
         }
 
         const sha1sum = crypto.createHash('sha1');
-        sha1sum.update(location.TSLLocation);
+        sha1sum.update(url);
         const digest = sha1sum.digest('hex');
 
         await (s3.putObject({
@@ -56,7 +55,16 @@ module.exports.refresh = async (event, context, callback) => {
             Key: digest,
             Body: content,
         }).promise());
-    }));
+    };
+
+    // LOTL itself and its scheme information pivot
+    await saveUrl(LOTL_URL);
+    const pivotUrl = lotl.TrustServiceStatusList.SchemeInformation.SchemeInformationURI.URI.find((uri) => uri.includes('pivot'));
+    pivotUrl && await saveUrl(pivotUrl);
+
+    // Lists of lists
+    const list = lotl.TrustServiceStatusList.SchemeInformation.PointersToOtherTSL.OtherTSLPointer;
+    await Promise.all(list.map(location => saveUrl(location.TSLLocation)));
 
     console.log(`OK - update took ${Date.now() - startTime}ms.`);
     return;
